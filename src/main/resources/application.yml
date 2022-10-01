@@ -8,9 +8,9 @@ datasource:
 
 # Заполняем базу данных первоначальными данными
 ebean:
-  db:
-    ddl:
-      generate: true
+  development:
+    migration:
       run: true
-  migration:
-    run: true
+  production:
+    migration:
+      run: true
