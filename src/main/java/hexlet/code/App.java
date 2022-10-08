@@ -1,6 +1,7 @@
 package hexlet.code;
 
 import hexlet.code.Controllers.RootController;
+import hexlet.code.Controllers.UrlController;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.plugin.rendering.JavalinRenderer;
@@ -12,7 +13,7 @@ import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
-import static io.javalin.apibuilder.ApiBuilder.path;
+import static io.javalin.apibuilder.ApiBuilder.*;
 
 public class App {
 
@@ -32,9 +33,13 @@ public class App {
     }
 
     private static void addRoutes(Javalin app) {
-        app.get("", RootController.welcome);
-
-
+        app.get("/", RootController.welcome);
+        app.routes(() -> path("urls", () -> {
+            get(UrlController.showUrls);
+            post(UrlController.addUrl);
+            get("{id}", UrlController.showUrl);
+            post("{id}/checks", UrlController.addCheck);
+        }));
     }
 
     private static int getPort() {
@@ -46,6 +51,7 @@ public class App {
         TemplateEngine templateEngine = new TemplateEngine();
         ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
         templateResolver.setPrefix("/templates/");
+        templateResolver.setSuffix(".html");
         templateEngine.addTemplateResolver(templateResolver);
         templateEngine.addDialect(new LayoutDialect());
         templateEngine.addDialect(new Java8TimeDialect());
