@@ -130,7 +130,7 @@ class AppTest {
             assertThat(body).contains("Страница уже существует");
         }
 
-        @Test
+/*        @Test
         void testCreateBadUrl() {
             String inputName = "1231241624656tusdgsdfn5a35";
             HttpResponse<String> responsePost1 = Unirest
@@ -146,6 +146,6 @@ class AppTest {
             String body = response.getBody();
 
             assertThat(body).contains("Некорректный URL");
-        }
+        }*/
     }
 }
