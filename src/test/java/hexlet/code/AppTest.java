@@ -6,9 +6,16 @@ import io.ebean.DB;
 import io.ebean.Database;
 import io.javalin.Javalin;
 import kong.unirest.Unirest;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.*;
+
+import static java.nio.file.Files.readString;
 import static org.assertj.core.api.Assertions.assertThat;
 import kong.unirest.HttpResponse;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 
 class AppTest {
 
@@ -57,24 +64,6 @@ class AppTest {
     class UrlTest {
 
         @Test
-        void testAddUrl() {
-            String inputUrl = "https://www.cia.edu";
-            HttpResponse<String> responsePost = Unirest
-                    .post(baseUrl + "/urls")
-                    .field("url", inputUrl)
-                    .asEmpty();
-
-            assertThat(responsePost.getStatus()).isEqualTo(302);
-
-            Url dbUrl = new QUrl()
-                    .name.equalTo(inputUrl)
-                    .findOne();
-
-            assertThat(dbUrl).isNotNull();
-            assertThat(dbUrl.getName()).isEqualTo(inputUrl);
-        }
-
-        @Test
         void testListUrls() {
             HttpResponse<String> response = Unirest
                     .get(baseUrl + "/urls")
@@ -96,6 +85,71 @@ class AppTest {
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(body).contains("https://www.example.com");
+        }
+
+        @Test
+        void testAddUrl() {
+            String input = "https://www.rambler.ru";
+            HttpResponse<String> responsePost = Unirest
+                    .post(baseUrl + "/urls")
+                    .field("url", input)
+                    .asEmpty();
+
+            assertThat(responsePost.getStatus()).isEqualTo(302);
+            assertThat(responsePost.getHeaders().getFirst("Location")).isEqualTo("/urls");
+
+            HttpResponse<String> response = Unirest
+                    .get(baseUrl + "/urls")
+                    .asString();
+            String body = response.getBody();
+
+            assertThat(response.getStatus()).isEqualTo(200);
+            assertThat(body).contains(input);
+            assertThat(body).contains("Страница успешно добавлена");
+
+            Url actualUrl = new QUrl()
+                    .name.equalTo(input)
+                    .findOne();
+
+            assertThat(actualUrl).isNotNull();
+            assertThat(actualUrl.getName()).isEqualTo(input);
+        }
+
+        @Test
+        void testCreateExistingUrl() {
+            String inputName = "https://www.example.com";
+            HttpResponse<String> responsePost1 = Unirest
+                    .post(baseUrl + "/urls")
+                    .field("url", inputName)
+                    .asEmpty();
+
+            assertThat(responsePost1.getHeaders().getFirst("Location")).isEqualTo("/urls");
+
+            HttpResponse<String> response = Unirest
+                    .get(baseUrl + "/urls")
+                    .asString();
+            String body = response.getBody();
+
+            assertThat(body).contains(inputName);
+            assertThat(body).contains("Страница уже существует");
+        }
+
+        @Test
+        void testCreateBadUrl() {
+            String inputName = "1231241624656tusdgsdfn5a35";
+            HttpResponse<String> responsePost1 = Unirest
+                    .post(baseUrl + "/urls")
+                    .field("url", inputName)
+                    .asEmpty();
+
+            assertThat(responsePost1.getHeaders().getFirst("Location")).isEqualTo("/");
+
+            HttpResponse<String> response = Unirest
+                    .get(baseUrl + "/")
+                    .asString();
+            String body = response.getBody();
+
+            assertThat(body).contains("Некорректный URL");
         }
 
 

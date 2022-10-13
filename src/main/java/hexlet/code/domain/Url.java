@@ -5,6 +5,8 @@ import io.ebean.annotation.WhenCreated;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -13,6 +15,7 @@ public class Url extends Model {
     @Id
     @GeneratedValue
     private long id;
+
 
     private String name;
 
@@ -25,6 +28,7 @@ public class Url extends Model {
 
     public Url(String name) {
         this.name = name;
+        urlChecks = new ArrayList<>();
     }
 
     public long getId() {
@@ -47,4 +51,13 @@ public class Url extends Model {
         return createdAt;
     }
 
+    public List<UrlCheck> getUrlChecks() {
+        return urlChecks;
+    }
+
+    public final UrlCheck getLastUrlCheck() {
+        return urlChecks.stream()
+                .max(Comparator.comparing(UrlCheck::getCreatedAt))
+                .orElse(null);
+    }
 }

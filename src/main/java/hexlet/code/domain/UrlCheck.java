@@ -12,6 +12,8 @@ public final class UrlCheck extends Model {
     @Id
     private long id;
 
+    private int statusCode;
+
     private String title;
 
     private String h1;
@@ -22,13 +24,10 @@ public final class UrlCheck extends Model {
     @WhenCreated
     private Instant createdAt;
 
-    private Long statusCode;
-
-    @JoinColumn(name = "url_id")
     @ManyToOne
     private Url url;
 
-    public UrlCheck(long statusCode, String title, String h1, String description, Url url) {
+    public UrlCheck(int statusCode, String title, String h1, String description, Url url) {
         this.statusCode = statusCode;
         this.title = title;
         this.h1 = h1;
@@ -38,6 +37,10 @@ public final class UrlCheck extends Model {
 
     public long getId() {
         return id;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
     }
 
     public String getTitle() {
@@ -54,10 +57,6 @@ public final class UrlCheck extends Model {
 
     public Instant getCreatedAt() {
         return createdAt;
-    }
-
-    public Long getStatusCode() {
-        return statusCode;
     }
 
     public Url getUrl() {

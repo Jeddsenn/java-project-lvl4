@@ -3,14 +3,10 @@ package hexlet.code;
 import hexlet.code.Controllers.RootController;
 import hexlet.code.Controllers.UrlController;
 import io.javalin.Javalin;
-import io.javalin.http.Context;
-import io.javalin.plugin.rendering.JavalinRenderer;
 import io.javalin.plugin.rendering.template.JavalinThymeleaf;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
-import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
-import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
@@ -20,41 +16,58 @@ public class App {
     public static void main(String[] args) {
         Javalin app = getApp();
         app.start(getPort());
-        addRoutes(app);
     }
 
-    static Javalin getApp(){
+    public static Javalin getApp() {
         Javalin app = Javalin.create(config -> {
-            config.enableDevLogging();
+            if (!isProduction()) {
+                config.enableDevLogging();
+            }
             config.enableWebjars();
+            JavalinThymeleaf.configure(getTemplateEngine());
         });
-        JavalinThymeleaf.configure(getTemplateEngine());
+        addRoutes(app);
+        app.before(ctx -> {
+            ctx.attribute("ctx", ctx);
+        });
         return app;
     }
 
     private static void addRoutes(Javalin app) {
         app.get("/", RootController.welcome);
-        app.routes(() -> path("urls", () -> {
-            get(UrlController.showUrls);
-            post(UrlController.addUrl);
-            get("{id}", UrlController.showUrl);
-            post("{id}/checks", UrlController.addCheck);
-        }));
+        app.routes(() -> {
+            path("urls", () -> {
+                post(UrlController.addUrl);
+                get(UrlController.listUrls);
+                path("{id}", () -> {
+                    get(UrlController.showUrl);
+                    path("checks", () -> {
+                        post(UrlController.addCheck);
+                    });
+                });
+            });
+        });
     }
 
     private static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "5000");
-        return Integer.parseInt(port);
+        return Integer.valueOf(port);
     }
 
     private static TemplateEngine getTemplateEngine() {
         TemplateEngine templateEngine = new TemplateEngine();
         ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
         templateResolver.setPrefix("/templates/");
-        templateResolver.setSuffix(".html");
         templateEngine.addTemplateResolver(templateResolver);
         templateEngine.addDialect(new LayoutDialect());
         templateEngine.addDialect(new Java8TimeDialect());
         return templateEngine;
+    }
+    private static String getMode() {
+        return System.getenv().getOrDefault("APP_ENV", "development");
+    }
+
+    private static boolean isProduction() {
+        return getMode().equals("production");
     }
 }

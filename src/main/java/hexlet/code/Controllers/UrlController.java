@@ -1,19 +1,18 @@
 package hexlet.code.Controllers;
 
+import hexlet.code.UrlParser;
 import hexlet.code.domain.Url;
+import hexlet.code.domain.UrlCheck;
 import hexlet.code.domain.query.QUrl;
+import hexlet.code.domain.query.QUrlCheck;
 import io.ebean.PagedList;
 import io.javalin.http.Handler;
 import io.javalin.http.NotFoundResponse;
 
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static java.util.Objects.requireNonNull;
 
 public final class UrlController {
     public static Handler addUrl = ctx -> {
@@ -47,8 +46,7 @@ public final class UrlController {
         return;
     };
 
-    public static Handler showUrls = ctx -> {
-      // get all urs out of db and list them
+    public static Handler listUrls = ctx -> {
         int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1) - 1;
         int rowsPerPage = 10;
         PagedList<Url> pagedUrls = new QUrl()
@@ -71,21 +69,40 @@ public final class UrlController {
     };
 
     public static Handler showUrl = ctx -> {
-        // show the exact url by urls/{id}
         int id = ctx.pathParamAsClass("id", Integer.class).getOrDefault(null);
-
         Url url = new QUrl()
                 .id.equalTo(id)
                 .findOne();
         if (url == null) {
             throw new NotFoundResponse();
         }
+        List<UrlCheck> checks = new QUrlCheck().url.equalTo(url)
+                .orderBy().id.desc()
+                .findList();
         ctx.attribute("url", url);
+        ctx.attribute("checks", checks);
         ctx.render("showUrl.html");
-
     };
 
     public static Handler addCheck = ctx -> {
-      ctx.render("main.html");
+        int id = ctx.pathParamAsClass("id", Integer.class).getOrDefault(null);
+        Url url = new QUrl()
+                .id.equalTo(id)
+                .findOne();
+        if (url == null) {
+            throw new NotFoundResponse();
+        }
+        UrlCheck check = UrlParser.checkUrl(url);
+
+        if (check != null) {
+            check.save();
+            ctx.sessionAttribute("flash", "Страница успешно проверена");
+            ctx.sessionAttribute("flash-type", "success");
+        } else {
+            ctx.sessionAttribute("flash", "Проверка не удалась");
+            ctx.sessionAttribute("flash-type", "danger");
+        }
+        ctx.redirect("/urls/" + url.getId());
     };
+
 }
