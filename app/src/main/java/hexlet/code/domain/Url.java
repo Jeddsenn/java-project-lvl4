@@ -3,7 +3,11 @@ package hexlet.code.domain;
 import io.ebean.Model;
 import io.ebean.annotation.WhenCreated;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -31,27 +35,27 @@ public class Url extends Model {
         urlChecks = new ArrayList<>();
     }
 
-    public long getId() {
+    public final long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public final void setId(long id) {
         this.id = id;
     }
 
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public final void setName(String name) {
         this.name = name;
     }
 
-    public Instant getCreatedAt() {
+    public final Instant getCreatedAt() {
         return createdAt;
     }
 
-    public List<UrlCheck> getUrlChecks() {
+    public final List<UrlCheck> getUrlChecks() {
         return urlChecks;
     }
 

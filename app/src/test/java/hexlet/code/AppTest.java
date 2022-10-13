@@ -7,23 +7,17 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import static java.nio.file.Files.readString;
 import static org.assertj.core.api.Assertions.assertThat;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import io.javalin.Javalin;
 import io.ebean.DB;
 import io.ebean.Database;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 
 class AppTest {
 
     private static Javalin app;
     private static String baseUrl;
-    private static Url existingUrl;
     private static Database database;
 
 
@@ -153,8 +147,5 @@ class AppTest {
 
             assertThat(body).contains("Некорректный URL");
         }
-
-
-
     }
 }
