@@ -2,11 +2,15 @@ package hexlet.code;
 
 import hexlet.code.domain.Url;
 import hexlet.code.domain.query.QUrl;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import static java.nio.file.Files.readString;
 import static org.assertj.core.api.Assertions.assertThat;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
@@ -14,36 +18,42 @@ import io.javalin.Javalin;
 import io.ebean.DB;
 import io.ebean.Database;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+
 class AppTest {
 
     private static Javalin app;
     private static String baseUrl;
     private static Database database;
+    private static MockWebServer mockWebServer;
 
 
     @BeforeAll
-    public static void beforeAll() {
+    public static void beforeAll() throws IOException {
         app = App.getApp();
         app.start(0);
         int port = app.port();
         baseUrl = "http://localhost:" + port;
         database = DB.getDefault();
+
+        mockWebServer = new MockWebServer();
+        var resp = readString(Paths.get("src", "test", "resources", "mock.html"));
+        mockWebServer.enqueue(new MockResponse().setBody(resp));
+        mockWebServer.start();
     }
 
     @AfterAll
-    public static void afterAll() {
+    public static void afterAll() throws IOException {
         app.stop();
+        mockWebServer.shutdown();
     }
 
     @BeforeEach
     void beforeEach() {
         database.script().run("/truncate.sql");
         database.script().run("/seed-test-db.sql");
-    }
-
-    @Test
-    void testInit() {
-        assertThat(true).isEqualTo(true);
     }
 
     @Nested
@@ -130,9 +140,9 @@ class AppTest {
             assertThat(body).contains("Страница уже существует");
         }
 
-/*        @Test
+        @Test
         void testCreateBadUrl() {
-            String inputName = "1231241624656tusdgsdfn5a35";
+            String inputName = "asdfasdfasdfasdf";
             HttpResponse<String> responsePost1 = Unirest
                     .post(baseUrl + "/urls")
                     .field("url", inputName)
@@ -146,6 +156,33 @@ class AppTest {
             String body = response.getBody();
 
             assertThat(body).contains("Некорректный URL");
-        }*/
+        }
+
+        @Test
+        public void testCheckUrl() throws Exception {
+            String mockHTML = readString(Paths.get("src/test/resources/mock.html"), StandardCharsets.US_ASCII);
+            MockWebServer server = new MockWebServer();
+            server.enqueue(new MockResponse().setBody(mockHTML));
+            server.start();
+
+            String mockUrl = server.url("/").toString();
+            HttpResponse<String> response = Unirest.post(baseUrl + "/urls")
+                    .field("url", mockUrl)
+                    .asEmpty();
+
+            Url url = new QUrl().name.equalTo(mockUrl.substring(0, mockUrl.length() - 1))
+                    .findOne();
+            HttpResponse<String> responseCheck = Unirest.post(baseUrl + "/urls/" + url.getId() + "/checks")
+                    .asEmpty();
+            HttpResponse<String> responseShow = Unirest.get(baseUrl + "/urls/" + url.getId()).asString();
+            server.shutdown();
+
+            assertThat(200).isEqualTo(responseShow.getStatus());
+            assertThat(responseShow.getBody()).contains("Title");
+            assertThat(responseShow.getBody()).contains("Lorem Ipsum");
+            assertThat(responseShow.getBody()).contains("CONTENT");
+        }
+
+
     }
 }
