@@ -1,7 +1,7 @@
 package hexlet.code;
 
-import hexlet.code.Controllers.RootController;
-import hexlet.code.Controllers.UrlController;
+import hexlet.code.controllers.RootController;
+import hexlet.code.controllers.UrlController;
 import io.javalin.Javalin;
 import io.javalin.plugin.rendering.template.JavalinThymeleaf;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;

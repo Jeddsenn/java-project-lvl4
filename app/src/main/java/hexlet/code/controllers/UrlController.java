@@ -1,4 +1,4 @@
-package hexlet.code.Controllers;
+package hexlet.code.controllers;
 
 import hexlet.code.UrlParser;
 import hexlet.code.domain.Url;
@@ -18,8 +18,18 @@ public final class UrlController {
     public static Handler addUrl = ctx -> {
         // get input as url
         String formParam = ctx.formParam("url");
-        URL formedUrl = new URL(formParam);
-        String validUrl = formedUrl.getProtocol() + "://" + formedUrl.getAuthority();
+        URL formedUrl;
+
+        try {
+            formedUrl = new URL(formParam);
+        } catch (Exception e) {
+            ctx.sessionAttribute("flash", "Некорректный URL");
+            ctx.sessionAttribute("flash-type", "danger");
+            ctx.redirect("/");
+            return;
+        }
+
+        String normalizedUrl = formedUrl.getProtocol() + "://" + formedUrl.getAuthority();
 
         if (formedUrl == null) {
             ctx.sessionAttribute("flash", "Некорректный URL");
@@ -29,7 +39,7 @@ public final class UrlController {
         }
 
         Url url = new QUrl()
-                .name.equalTo(validUrl)
+                .name.equalTo(normalizedUrl)
                 .findOne();
         if (url != null) {
             ctx.sessionAttribute("flash", "Страница уже существует");
@@ -38,7 +48,7 @@ public final class UrlController {
             return;
         }
 
-        Url newUrl = new Url(validUrl);
+        Url newUrl = new Url(normalizedUrl);
         newUrl.save();
         ctx.sessionAttribute("flash", "Страница успешно добавлена");
         ctx.sessionAttribute("flash-type", "success");
@@ -70,7 +80,7 @@ public final class UrlController {
 
     public static Handler showUrl = ctx -> {
         int id = ctx.pathParamAsClass("id", Integer.class).getOrDefault(null);
-        Url url = new QUrl()
+        Url url = new QUrl().urlChecks.fetch()
                 .id.equalTo(id)
                 .findOne();
         if (url == null) {
