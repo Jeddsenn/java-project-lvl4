@@ -172,15 +172,17 @@ class AppTest {
 
             Url url = new QUrl().name.equalTo(mockUrl.substring(0, mockUrl.length() - 1))
                     .findOne();
+
             HttpResponse<String> responseCheck = Unirest.post(baseUrl + "/urls/" + url.getId() + "/checks")
                     .asEmpty();
             HttpResponse<String> responseShow = Unirest.get(baseUrl + "/urls/" + url.getId()).asString();
             server.shutdown();
 
-            assertThat(200).isEqualTo(responseShow.getStatus());
+            assertThat(responseShow.getStatus()).isEqualTo(200);
             assertThat(responseShow.getBody()).contains("Title");
             assertThat(responseShow.getBody()).contains("Lorem Ipsum");
             assertThat(responseShow.getBody()).contains("CONTENT");
+
         }
 
 

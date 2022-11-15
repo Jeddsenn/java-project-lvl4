@@ -59,9 +59,4 @@ public class Url extends Model {
         return urlChecks;
     }
 
-    public final UrlCheck getLastUrlCheck() {
-        return urlChecks.stream()
-                .max(Comparator.comparing(UrlCheck::getCreatedAt))
-                .orElse(null);
-    }
 }

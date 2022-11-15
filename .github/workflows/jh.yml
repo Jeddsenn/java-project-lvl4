@@ -29,3 +29,5 @@ jobs:
         with:
           coverageCommand: make -C app report
           coverageLocations: ${{github.workspace}}/app/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
+
+
