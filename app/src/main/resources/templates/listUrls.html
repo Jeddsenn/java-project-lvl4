@@ -18,13 +18,13 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:if="${urls.empty}">
-                <td colspan="2"> Список сайтов пуст </td>
-            </tr>
-            <tr th:each="url : ${urls}">
-                <td><span class="col-1" th:text="${url.id}"></span></td>
-                <td><a th:href="@{/urls/{id}(id=${url.id})}"><span th:text="${url.name}"></span></a></td>
-                <td><span class="col-2" th:text="${#temporals.format(url.createdAt, 'dd-MM-yyyy HH:mm')}"></span></td>
+            <tr th:each="url : ${urls}" th:object="${url}">
+                <td th:text="*{getId()}"></td>
+                <td>
+                    <a th:href="@{/urls/{id}(id=*{getId()})}" th:text="*{getName()}"></a>
+                </td>
+                <td th:text="*{getLastUrlCheck()} != null ? *{getLastUrlCheck().getCreatedAt()} : '-' "></td>
+                <td th:text="*{getLastUrlCheck()} != null ? *{getLastUrlCheck().getStatusCode()} : '-' "></td>
             </tr>
             </tbody>
         </table>
