@@ -23,7 +23,9 @@ tasks.withType(JavaCompile) {
 
 compileJava {
     options.release = 17
+    options.encoding = 'UTF-8'
 }
+
 
 application {
     mainClass = 'hexlet.code.App'
