@@ -15,9 +15,14 @@ repositories {
     mavenCentral()
 }
 
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 compileJava {
     options.release = 17
-    options.encoding = 'UTF-8'
 }
 
 application {
