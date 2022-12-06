@@ -175,6 +175,7 @@ class AppTest {
 
             HttpResponse<String> responseCheck = Unirest.post(baseUrl + "/urls/" + url.getId() + "/checks")
                     .asEmpty();
+
             HttpResponse<String> responseShow = Unirest.get(baseUrl + "/urls/" + url.getId()).asString();
             server.shutdown();
 

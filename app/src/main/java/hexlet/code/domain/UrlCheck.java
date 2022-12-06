@@ -2,7 +2,6 @@ package hexlet.code.domain;
 
 import io.ebean.Model;
 import io.ebean.annotation.WhenCreated;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;

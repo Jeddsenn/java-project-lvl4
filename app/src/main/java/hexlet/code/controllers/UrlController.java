@@ -1,6 +1,5 @@
 package hexlet.code.controllers;
 
-import hexlet.code.UrlParser;
 import hexlet.code.domain.Url;
 import hexlet.code.domain.UrlCheck;
 import hexlet.code.domain.query.QUrl;
@@ -8,6 +7,11 @@ import hexlet.code.domain.query.QUrlCheck;
 import io.ebean.PagedList;
 import io.javalin.http.Handler;
 import io.javalin.http.NotFoundResponse;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.net.URL;
 import java.util.List;
@@ -95,24 +99,43 @@ public final class UrlController {
     };
 
     public static Handler addCheck = ctx -> {
-        int id = ctx.pathParamAsClass("id", Integer.class).getOrDefault(null);
+        long id = ctx.pathParamAsClass("id", Integer.class).getOrDefault(null);
         Url url = new QUrl()
                 .id.equalTo(id)
                 .findOne();
-        if (url == null) {
-            throw new NotFoundResponse();
-        }
-        UrlCheck check = UrlParser.checkUrl(url);
+        String name = url.getName();
+        try {
+            HttpResponse<String> responseGet = Unirest.get(name).asString();
 
-        if (check != null) {
-            check.save();
+            int statusCode = responseGet.getStatus();
+
+            Document document = Jsoup.parse(responseGet.getBody());
+
+            String title = document.title();
+
+            String description = null;
+
+            if (document.selectFirst("meta[name=description]") != null) {
+                description = document.selectFirst("meta[name=description]").attr("content");
+            }
+
+            String h1 = null;
+
+            if (document.selectFirst("h1") != null) {
+                h1 = document.selectFirst("h1").text();
+            }
+
+            UrlCheck urlCheck = new UrlCheck(statusCode, title, h1, description, url);
+            urlCheck.save();
+
             ctx.sessionAttribute("flash", "Страница успешно проверена");
             ctx.sessionAttribute("flash-type", "success");
-        } else {
-            ctx.sessionAttribute("flash", "Проверка не удалась");
+        } catch (UnirestException exception) {
+            ctx.sessionAttribute("flash", "Не удалось проверить страницу");
             ctx.sessionAttribute("flash-type", "danger");
         }
-        ctx.redirect("/urls/" + url.getId());
+        ctx.redirect("/urls/" + id);
     };
+
 
 }

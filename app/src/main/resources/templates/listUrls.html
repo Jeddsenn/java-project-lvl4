@@ -19,12 +19,14 @@
             </thead>
             <tbody>
             <tr th:each="url : ${urls}" th:object="${url}">
-                <td th:text="*{getId()}"></td>
+                <td th:text="*{id}"></td>
                 <td>
-                    <a th:href="@{/urls/{id}(id=*{getId()})}" th:text="*{getName()}"></a>
+                    <a th:text="*{name}" th:href="@{/urls/{id}(id=*{id})}"></a>
                 </td>
-                <td th:text="*{getLastUrlCheck()} != null ? *{getLastUrlCheck().getCreatedAt()} : '-' "></td>
-                <td th:text="*{getLastUrlCheck()} != null ? *{getLastUrlCheck().getStatusCode()} : '-' "></td>
+                <td th:if="${url.urlChecks.isEmpty}"></td>
+                <td th:if="${url.urlChecks.isEmpty}"></td>
+                <td th:unless="${url.urlChecks.isEmpty}" th:text="${#temporals.format(url.urlChecks.get(0).createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:unless="${url.urlChecks.isEmpty}" th:text="*{urlChecks.get(0).statusCode}"></td>
             </tr>
             </tbody>
         </table>

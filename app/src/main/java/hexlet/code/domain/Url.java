@@ -2,7 +2,6 @@ package hexlet.code.domain;
 
 import io.ebean.Model;
 import io.ebean.annotation.WhenCreated;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,7 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -57,12 +55,6 @@ public class Url extends Model {
 
     public final List<UrlCheck> getUrlChecks() {
         return urlChecks;
-    }
-
-    public final UrlCheck getLastUrlCheck() {
-        return urlChecks.stream()
-                .max(Comparator.comparing(x -> x.getCreatedAt()))
-                .orElse(null);
     }
 
 }
