@@ -84,7 +84,7 @@ public final class UrlController {
         ctx.attribute("urls", urls);
         ctx.attribute("currentPage", currentPage);
         ctx.attribute("pages", pages);
-        ctx.render("urls/index.html");
+        ctx.render("urls/listUrls.html");
     };
 
     public static Handler showUrl = ctx -> {
