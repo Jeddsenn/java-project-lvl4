@@ -79,7 +79,7 @@ public final class UrlController {
         ctx.attribute("urls", urls);
         ctx.attribute("pages", pages);
         ctx.attribute("currentPage", currentPage);
-        ctx.render("listUrls.html");
+        ctx.render("urls/listUrls.html");
     };
 
     public static Handler showUrl = ctx -> {
@@ -95,7 +95,7 @@ public final class UrlController {
                 .findList();
         ctx.attribute("url", url);
         ctx.attribute("checks", checks);
-        ctx.render("showUrl.html");
+        ctx.render("urls/showUrl.html");
     };
 
     public static Handler addCheck = ctx -> {
