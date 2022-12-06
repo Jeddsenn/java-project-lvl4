@@ -63,23 +63,28 @@ public final class UrlController {
     public static Handler listUrls = ctx -> {
         int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1) - 1;
         int rowsPerPage = 10;
+        QUrlCheck qUrlCheck = QUrlCheck.alias();
         PagedList<Url> pagedUrls = new QUrl()
+                .orderBy().id.asc()
+                .urlChecks.fetch(qUrlCheck.createdAt, qUrlCheck.statusCode)
+                .orderBy().urlChecks.id.desc()
                 .setFirstRow(page * rowsPerPage)
                 .setMaxRows(rowsPerPage)
-                .orderBy()
-                .id.asc()
                 .findPagedList();
+
         List<Url> urls = pagedUrls.getList();
+
         int lastPage = pagedUrls.getTotalPageCount() + 1;
         int currentPage = pagedUrls.getPageIndex() + 1;
         List<Integer> pages = IntStream
                 .range(1, lastPage)
                 .boxed()
                 .collect(Collectors.toList());
+
         ctx.attribute("urls", urls);
-        ctx.attribute("pages", pages);
         ctx.attribute("currentPage", currentPage);
-        ctx.render("urls/listUrls.html");
+        ctx.attribute("pages", pages);
+        ctx.render("urls/index.html");
     };
 
     public static Handler showUrl = ctx -> {
