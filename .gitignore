@@ -1,7 +1,6 @@
 .env
 .idea/
 .gradle
-*.db
 
 build
 
