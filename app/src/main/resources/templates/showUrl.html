@@ -23,10 +23,8 @@
             </tr>
         </table>
         <h2>Проверки</h2>
-        <form th:object="${url}" th:action="@{/urls/{id}/checks(id=*{id})}" method="post">
-            <nav aria-label="Control buttons">
-                <button class="btn btn-primary" type="submit">Запустить проверку</button>
-            </nav>
+        <form method="post" th:action="@{/urls/{id}/checks(id=${url.id})}">
+            <button type="submit" class="btn btn-primary">Запустить проверку</button>
         </form>
 
         <table class="table table-bordered table-hover mt-3" style="table-layout:fixed;">
