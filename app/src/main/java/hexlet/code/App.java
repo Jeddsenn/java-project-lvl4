@@ -39,12 +39,8 @@ public class App {
             path("urls", () -> {
                 post(UrlController.addUrl);
                 get(UrlController.listUrls);
-                path("{id}", () -> {
-                    get(UrlController.showUrl);
-                    path("checks", () -> {
-                        post(UrlController.addCheck);
-                    });
-                });
+                get("{id}", UrlController.showUrl);
+                post("{id}/checks", UrlController.addCheck);
             });
         });
     }
