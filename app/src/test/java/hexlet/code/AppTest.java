@@ -1,7 +1,9 @@
 package hexlet.code;
 
 import hexlet.code.domain.Url;
+import hexlet.code.domain.UrlCheck;
 import hexlet.code.domain.query.QUrl;
+import hexlet.code.domain.query.QUrlCheck;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.BeforeAll;
@@ -178,6 +180,10 @@ class AppTest {
 
             HttpResponse<String> responseShow = Unirest.get(baseUrl + "/urls/" + url.getId()).asString();
             server.shutdown();
+
+            UrlCheck check = new QUrlCheck()
+                    .findList().get(0);
+            assertThat(check).isNotNull();
 
             assertThat(responseShow.getStatus()).isEqualTo(200);
             assertThat(responseShow.getBody()).contains("Title");
